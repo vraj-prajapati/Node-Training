@@ -16,7 +16,6 @@ const readData = () => {
   }
 };
 
-
 const writeData = (data) => {
   try {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
@@ -24,7 +23,6 @@ const writeData = (data) => {
     console.error("Error writing file:", error);
   }
 };
-
 
 const server = http.createServer((req, res) => {
   const { method, url } = req;
