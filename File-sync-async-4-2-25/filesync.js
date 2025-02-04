@@ -33,7 +33,7 @@ const server = http.createServer((req, res) => {
       const data = readData();
       res.writeHead(200, { "Content-Type": "application/json" });
       res.end(JSON.stringify(data));
-    } else if (method === "POST") {
+    } else if (url.startsWith("/posts/add") && method === "POST") {
       
       let body = "";
       req.on("data", (chunk) => (body += chunk));
@@ -61,11 +61,12 @@ const server = http.createServer((req, res) => {
         res.writeHead(404, { "Content-Type": "application/json" });
         res.end(JSON.stringify({ message: "Item not found" }));
       }
-    } else if (method === "PUT") {
+    } else if (method === "PUT" &&  url.startsWith("/posts/update")) {
       let body = "";
       req.on("data", (chunk) => (body += chunk));
       req.on("end", () => {
         const updatedItem = JSON.parse(body);
+        const id = parseInt(url.split("/")[3], 10);
         const index = data.findIndex((d) => d.id === id);
         if (index !== -1) {
           data[index] = { ...data[index], ...updatedItem };
@@ -77,7 +78,25 @@ const server = http.createServer((req, res) => {
           res.end(JSON.stringify({ message: "Item not found" }));
         }
       });
-    } else if (method === "DELETE") {
+    } else if (method === "PATCH" &&  url.startsWith("/posts/modify")) {
+      let body = "";
+      req.on("data", (chunk) => (body += chunk));
+      req.on("end", () => {
+        const updatedItem = JSON.parse(body);
+        const id = parseInt(url.split("/")[3], 10);
+        const index = data.findIndex((d) => d.id === id);
+        if (index !== -1) {
+          data[index] = { ...data[index], ...updatedItem };
+          writeData(data);
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify(data[index]));
+        } else {
+          res.writeHead(404, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ message: "Item not found" }));
+        }
+      });
+    } else if (method === "DELETE" && url.startsWith("/posts/delete")) {
+        const id=parseInt(url.split("/")[3],10);
       const index = data.findIndex((d) => d.id === id);
       if (index !== -1) {
         const deletedItem = data.splice(index, 1);
